@@ -1,11 +1,14 @@
 import jieba
+import torch.nn.init
 from torchtext.legacy import data
 from torchtext.legacy.vocab import Vocab,Vectors
 from torchtext.legacy.data import Iterator
+import torchtext
 """
 去停用词
 """
-def get_stop_words(Stopfile='data/stopwords.txt'):
+dirPath = "/home/lzh/PycharmProjects/lzhComments/"
+def get_stop_words(Stopfile=dirPath+'data/stopwords.txt'):
     file_object = open(Stopfile, encoding='utf-8')
     stop_words = []
     for line in file_object.readlines():
@@ -26,7 +29,7 @@ text = data.Field(sequential=True,tokenize=jieba.lcut,stop_words=stopwords,lower
 label = data.Field(sequential=False)
 
 train,val = data.TabularDataset.splits(
-    path="./data",
+    path=dirPath+"data",
     skip_header=True,
     train="train.csv",
     validation='val.csv',
@@ -34,8 +37,9 @@ train,val = data.TabularDataset.splits(
     fields=[("text",text),("label",label)]
 )
 
-cache = 'data/.vector_cache'
-vectors = Vectors(name='./data/sgns.financial.word',cache=cache)
+cache = dirPath+'data/.vector_cache'
+vectors = Vectors(name=dirPath+'data/myvector.vector',cache=cache)
+# vectors.unk_init = torch.nn.init.xavier_uniform()
 text.build_vocab(train,val, vectors=vectors)
 label.build_vocab(train, val)
 batch_size=128
@@ -50,11 +54,12 @@ train_iter, val_iter = Iterator.splits(
 # print(vocab_size)
 # print(label_num)
 
-batch = next(iter(train_iter))
-data = batch.text
-# print(text.vocab.itos)
-# print(batch.text.shape)
-print(label.vocab.stoi)
-print(label.vocab.itos)
-print(batch.label)
-
+# batch = next(iter(train_iter))
+# data = batch.text
+# # print(text.vocab.itos)
+# # print(batch.text.shape)
+# print(label.vocab.stoi)
+# print(label.vocab.itos)
+# print(batch.label)
+print(vectors.vectors.shape)
+print(text.vocab.vectors.shape)
