@@ -2,12 +2,20 @@ import torch
 import time
 from torch import nn
 from models.LSTMAttention import BiLSTM_Attention,vocab_size
-from prepo import train_iter,val_iter
+from prepo import train_iter,val_iter,text
+import random
+import numpy as np
+import os
+random.seed(15)
+np.random.seed(15)
+torch.manual_seed(15)
+vocab = text.vocab
 def evaluate_accuracy(data_iter,net):
     acc_sum, n = 0.0, 0
     with torch.no_grad():
         for batch_idx, batch in enumerate(data_iter):
             X, y = batch.text, batch.label
+
          #   X = X.permute(1, 0)
             y.data.sub_(1)
             if isinstance(net, torch.nn.Module):
@@ -24,7 +32,9 @@ def evaluate_accuracy(data_iter,net):
     return acc_sum / n
 
 def train(train_iter, test_iter, net, loss, optimizer, num_epochs):
+    global_step = 0
     batch_count = 0
+    best_test_acc = 0
     for epoch in range(num_epochs):
         train_l_sum, train_acc_sum, n, start = 0.0, 0.0, 0, time.time()
         for batch_idx, batch in enumerate(train_iter):
@@ -40,7 +50,18 @@ def train(train_iter, test_iter, net, loss, optimizer, num_epochs):
             train_acc_sum += (y_hat.argmax(dim=1) == y).sum().item()
             n += y.shape[0]
             batch_count += 1
+            global_step+=1
         test_acc = evaluate_accuracy(test_iter, net)
+        if test_acc>best_test_acc:
+            best_test_acc = test_acc
+            saveDir = net._get_name()
+            output_dir = os.path.join("result", saveDir)
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            torch.save(net.state_dict(), os.path.join(output_dir,"model.bin"))
+            with open(os.path.join(output_dir,"acc_result.txt"),"w") as f:
+                f.write(f"acc:{best_test_acc}")
+
         print(
             'epoch %d, loss %.4f, train acc %.3f, test acc %.3f, time %.1f sec'
             % (epoch + 1, train_l_sum / batch_count, train_acc_sum / n,
@@ -53,6 +74,7 @@ def main():
     optimizer = torch.optim.Adam(net.parameters(), lr=lr)
     loss = nn.CrossEntropyLoss()
     train(train_iter, val_iter, net, loss, optimizer, num_epochs)
+
 
 if __name__ == '__main__':
     main()

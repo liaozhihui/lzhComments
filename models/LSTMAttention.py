@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from prepo import text
+from prepo import text,vectors
 from torch.functional import F
 
 
