@@ -49,6 +49,7 @@ train_iter, val_iter = Iterator.splits(
             batch_sizes=(batch_size, len(val)) # 训练集设置batch_size,验证集整个集合用于测试
     )
 
+
 # vocab_size = len(text.vocab)
 # label_num = len(label.vocab)
 # print(vocab_size)
@@ -61,5 +62,5 @@ train_iter, val_iter = Iterator.splits(
 # print(label.vocab.stoi)
 # print(label.vocab.itos)
 # print(batch.label)
-print(vectors.vectors.shape)
-print(text.vocab.vectors.shape)
+# print(vectors.vectors.shape)
+# print(text.vocab.vectors.shape)

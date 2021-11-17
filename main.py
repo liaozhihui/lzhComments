@@ -1,7 +1,8 @@
 import torch
 import time
 from torch import nn
-from models.LSTMAttention import BiLSTM_Attention,vocab_size
+# from models.LSTMAttention import BiLSTM_Attention,vocab_size
+from models.TEXTCNN import TextCNN,vocab_size
 from prepo import train_iter,val_iter,text
 import random
 import numpy as np
@@ -16,7 +17,7 @@ def evaluate_accuracy(data_iter,net):
         for batch_idx, batch in enumerate(data_iter):
             X, y = batch.text, batch.label
 
-         #   X = X.permute(1, 0)
+            X = X.permute(1, 0)
             y.data.sub_(1)
             if isinstance(net, torch.nn.Module):
                 net.eval() # 评估模式, 这会关闭dropout
@@ -39,7 +40,7 @@ def train(train_iter, test_iter, net, loss, optimizer, num_epochs):
         train_l_sum, train_acc_sum, n, start = 0.0, 0.0, 0, time.time()
         for batch_idx, batch in enumerate(train_iter):
             X, y = batch.text, batch.label
-           # X = X.permute(1, 0)
+            X = X.permute(1, 0)
             y.data.sub_(1)  #因为label中多了unk所以要减一
             y_hat = net(X)
             l = loss(y_hat, y)
@@ -63,16 +64,16 @@ def train(train_iter, test_iter, net, loss, optimizer, num_epochs):
                 f.write(f"acc:{best_test_acc}")
 
         print(
-            'epoch %d, loss %.4f, train acc %.3f, test acc %.3f, time %.1f sec'
+            'epoch %d, loss %.4f, train acc %.5f, test acc %.5f, time %.1f sec'
             % (epoch + 1, train_l_sum / batch_count, train_acc_sum / n,
                test_acc, time.time() - start))
 
 def main():
-    lr, num_epochs = 0.001, 10
-    embedding_dim, num_hiddens, num_layers = 100, 64, 1
-    net = BiLSTM_Attention(vocab_size, embedding_dim, num_hiddens, num_layers)
+    lr, num_epochs = 0.001, 15
+    embedding_dim, kernel_sizes, num_channels = 100, [3, 4, 5], [100, 100, 100]
+    net = TextCNN(vocab_size, embedding_dim, kernel_sizes, num_channels)
     optimizer = torch.optim.Adam(net.parameters(), lr=lr)
-    loss = nn.CrossEntropyLoss()
+    loss = nn.CrossEntropyLoss(weight=torch.from_numpy(np.array([3,30,1])).float()) #0,2,1
     train(train_iter, val_iter, net, loss, optimizer, num_epochs)
 
 
