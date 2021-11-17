@@ -95,10 +95,10 @@ def main():
     # loss = nn.CrossEntropyLoss(weight=torch.from_numpy(np.array([0.10,3,0.1])).float()) #0,2,1
     loss = nn.CrossEntropyLoss() #0,2,1
 
-    # train(train_iter, val_iter, net, loss, optimizer, num_epochs)
+    train(train_iter, val_iter, net, loss, optimizer, num_epochs)
     # net.load_state_dict(torch.load("./result/TextCNN/model.bin"))
     #
-    predict(test_iter,net)
+    # predict(test_iter,net)
 
 
 if __name__ == '__main__':

@@ -19,7 +19,7 @@ class TextCNN(nn.Module):
     def __init__(self, vocab_size, embedding_dim, kernel_sizes, num_channels):
         super(TextCNN, self).__init__()
         self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)  # embedding之后的shape: torch.Size([200, 8, 300])
-        self.word_embeddings = self.word_embeddings.from_pretrained(vectors, freeze=False)
+        # self.word_embeddings = self.word_embeddings.from_pretrained(vectors, freeze=False)
         self.dropout = nn.Dropout(0.5)
         self.decoder = nn.Linear(sum(num_channels), 3)
         # 时序最大池化层没有权重，所以可以共用一个实例
