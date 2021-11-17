@@ -25,8 +25,9 @@ stopwords = get_stop_words()
 # def tokenizer(text):
 #     return [word for word in jieba.lcut(text) if word not in stop_words]
 
-text = data.Field(sequential=True,tokenize=jieba.lcut,lower=True)
+text = data.Field(sequential=True,tokenize=jieba.lcut,stop_words=stopwords,lower=True)
 label = data.Field(sequential=False)
+ids = data.Field(sequential=False)
 
 train,val = data.TabularDataset.splits(
     path=dirPath+"data",
@@ -37,11 +38,18 @@ train,val = data.TabularDataset.splits(
     fields=[("text",text),("label",label)],
 )
 
+test = data.TabularDataset(path=dirPath+"data"+"/test_public.csv",
+    format="csv",
+    skip_header=True,
+    fields=[("id",ids),("text",text)])
+print(test.examples[0].id,test.examples[0].text)
+
 cache = dirPath+'data/.vector_cache'
 vectors = Vectors(name=dirPath+'data/myvector.vector',cache=cache)
 # vectors.unk_init = torch.nn.init.xavier_uniform()
-text.build_vocab(train,val, vectors=vectors)
+text.build_vocab(train,val,test, vectors=vectors)
 label.build_vocab(train, val)
+ids.build_vocab(test)
 batch_size=128
 train_iter, val_iter = Iterator.splits(
             (train, val),
@@ -49,7 +57,7 @@ train_iter, val_iter = Iterator.splits(
             batch_sizes=(batch_size, len(val)) # 训练集设置batch_size,验证集整个集合用于测试
     )
 
-
+test_iter = Iterator(test,batch_size=len(test),sort=False,sort_within_batch=False,shuffle=False)
 # vocab_size = len(text.vocab)
 # label_num = len(label.vocab)
 # print(vocab_size)
@@ -63,5 +71,6 @@ train_iter, val_iter = Iterator.splits(
 # print(label.vocab.itos)
 # print(batch.label)
 # print(vectors.vectors.shape)
-print(text.vocab.itos)
+print(ids.vocab.stoi)
+print(ids.vocab.itos)
 

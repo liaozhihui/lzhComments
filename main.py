@@ -3,9 +3,10 @@ import time
 from torch import nn
 # from models.LSTMAttention import BiLSTM_Attention,vocab_size
 from models.TEXTCNN import TextCNN,vocab_size
-from prepo import train_iter,val_iter,text
+from prepo import train_iter,val_iter,text,test_iter,ids,label
 import random
 import numpy as np
+import pandas as pd
 import os
 random.seed(15)
 np.random.seed(15)
@@ -18,6 +19,7 @@ def evaluate_accuracy(data_iter,net,save=False):
             X, y = batch.text, batch.label
 
             X = X.permute(1, 0)
+
             y.data.sub_(1)
             if isinstance(net, torch.nn.Module):
                 net.eval() # 评估模式, 这会关闭dropout
@@ -31,6 +33,22 @@ def evaluate_accuracy(data_iter,net,save=False):
                     acc_sum += (net(X).argmax(dim=1) == y).float().sum().item()
             n += y.shape[0]
     return acc_sum / n
+
+def predict(test_iter,net):
+    net.eval()
+    with torch.no_grad():
+        for batch_idx, batch in enumerate(test_iter):
+            index,X= batch.id,batch.text
+            idx = [ids.vocab.itos[i] for i in index]
+            X = X.permute(1, 0)
+            y = net(X).argmax(dim=1)
+            result = [label.vocab.itos[i+1] for i in y]
+            pd.DataFrame({"id":idx,"class":result}).to_csv("test_public_result.csv",index=False,header=["id","class"])
+
+
+
+
+
 
 def train(train_iter, test_iter, net, loss, optimizer, num_epochs):
     global_step = 0
@@ -69,12 +87,18 @@ def train(train_iter, test_iter, net, loss, optimizer, num_epochs):
                test_acc, time.time() - start))
 
 def main():
+
     lr, num_epochs = 0.001, 15
     embedding_dim, kernel_sizes, num_channels = 100, [3, 4, 5], [100, 100, 100]
     net = TextCNN(vocab_size, embedding_dim, kernel_sizes, num_channels)
     optimizer = torch.optim.Adam(net.parameters(), lr=lr)
-    loss = nn.CrossEntropyLoss(weight=torch.from_numpy(np.array([3,1,6])).float()) #0,2,1
-    train(train_iter, val_iter, net, loss, optimizer, num_epochs)
+    # loss = nn.CrossEntropyLoss(weight=torch.from_numpy(np.array([0.10,3,0.1])).float()) #0,2,1
+    loss = nn.CrossEntropyLoss() #0,2,1
+
+    # train(train_iter, val_iter, net, loss, optimizer, num_epochs)
+    # net.load_state_dict(torch.load("./result/TextCNN/model.bin"))
+    #
+    predict(test_iter,net)
 
 
 if __name__ == '__main__':
