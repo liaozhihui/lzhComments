@@ -3,7 +3,7 @@ from torch import nn
 from prepo import text,vectors
 from torch.functional import F
 
-vectors = text.vocab.vectors
+vectors = text.vocab.vectors.clone()
 vocab_size = len(text.vocab)
 
 

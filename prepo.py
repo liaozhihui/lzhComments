@@ -25,7 +25,7 @@ stopwords = get_stop_words()
 # def tokenizer(text):
 #     return [word for word in jieba.lcut(text) if word not in stop_words]
 
-text = data.Field(sequential=True,tokenize=jieba.lcut,stop_words=stopwords,lower=True)
+text = data.Field(sequential=True,tokenize=jieba.lcut,lower=True)
 label = data.Field(sequential=False)
 
 train,val = data.TabularDataset.splits(
@@ -63,4 +63,5 @@ train_iter, val_iter = Iterator.splits(
 # print(label.vocab.itos)
 # print(batch.label)
 # print(vectors.vectors.shape)
-# print(text.vocab.vectors.shape)
+print(text.vocab.itos)
+

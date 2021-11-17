@@ -11,7 +11,7 @@ random.seed(15)
 np.random.seed(15)
 torch.manual_seed(15)
 vocab = text.vocab
-def evaluate_accuracy(data_iter,net):
+def evaluate_accuracy(data_iter,net,save=False):
     acc_sum, n = 0.0, 0
     with torch.no_grad():
         for batch_idx, batch in enumerate(data_iter):
@@ -73,7 +73,7 @@ def main():
     embedding_dim, kernel_sizes, num_channels = 100, [3, 4, 5], [100, 100, 100]
     net = TextCNN(vocab_size, embedding_dim, kernel_sizes, num_channels)
     optimizer = torch.optim.Adam(net.parameters(), lr=lr)
-    loss = nn.CrossEntropyLoss(weight=torch.from_numpy(np.array([3,30,1])).float()) #0,2,1
+    loss = nn.CrossEntropyLoss(weight=torch.from_numpy(np.array([3,1,6])).float()) #0,2,1
     train(train_iter, val_iter, net, loss, optimizer, num_epochs)
 
 
