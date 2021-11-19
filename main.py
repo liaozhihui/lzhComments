@@ -92,13 +92,13 @@ def main():
     embedding_dim, kernel_sizes, num_channels = 100, [3, 4, 5], [100, 100, 100]
     net = TextCNN(vocab_size, embedding_dim, kernel_sizes, num_channels)
     optimizer = torch.optim.Adam(net.parameters(), lr=lr)
-    # loss = nn.CrossEntropyLoss(weight=torch.from_numpy(np.array([0.10,3,0.1])).float()) #0,2,1
+    # loss = nn.CrossEntropyLoss(weight=torch.from_numpy(np.array([1,9,3])).float()) #2,0,1
     loss = nn.CrossEntropyLoss() #0,2,1
 
-    train(train_iter, val_iter, net, loss, optimizer, num_epochs)
-    # net.load_state_dict(torch.load("./result/TextCNN/model.bin"))
+    # train(train_iter, val_iter, net, loss, optimizer, num_epochs)
+    net.load_state_dict(torch.load("./result/TextCNN/model.bin"))
     #
-    # predict(test_iter,net)
+    predict(test_iter,net)
 
 
 if __name__ == '__main__':

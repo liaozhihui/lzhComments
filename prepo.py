@@ -7,7 +7,7 @@ import torchtext
 """
 去停用词
 """
-dirPath = "F:/PycharmProjects/lzhComments/"
+dirPath = "/home/lzh/PycharmProjects/lzhComments/"
 def get_stop_words(Stopfile=dirPath+'data/stopwords.txt'):
     file_object = open(Stopfile, encoding='utf-8')
     stop_words = []
@@ -32,10 +32,12 @@ ids = data.Field(sequential=False)
 train,val = data.TabularDataset.splits(
     path=dirPath+"data",
     skip_header=True,
-    train="train.csv",
-    validation='val.csv',
-    format="csv",
-    fields=[("text",text),("label",label)],
+    train="train.tsv",
+    validation='test.tsv',
+    format="tsv",
+    # fields=[("label",label),("text",text),],
+    fields=[("label", label),("text", text), ],
+
 )
 
 test = data.TabularDataset(path=dirPath+"data"+"/test_public.csv",
@@ -71,6 +73,5 @@ test_iter = Iterator(test,batch_size=len(test),sort=False,sort_within_batch=Fals
 # print(label.vocab.itos)
 # print(batch.label)
 # print(vectors.vectors.shape)
-print(ids.vocab.stoi)
-print(ids.vocab.itos)
+print(label.vocab.itos)
 
