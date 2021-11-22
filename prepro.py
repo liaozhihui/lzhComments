@@ -1,29 +1,18 @@
-from dataclasses import dataclass
-from typing import List, Optional, Union
+import re
+import os
 import json
-import dataclasses
+from transformers import BertTokenizer
+from collections import defaultdict
+import logging
 
-@dataclass
+logger = logging.getLogger(__name__)
+
 class InputExample:
 
-    guid: str
-    text_a: str
-    text_b: Optional[str] = None
-    label: Optional[str] = None
-
-    def to_json_string(self):
-        """Serializes this instance to a JSON string."""
-        return json.dumps(dataclasses.asdict(self), indent=2) + "\n"
+    def __init__(self,text_a,text_b=None,labels=None):
+        self.text_a = text_a
+        self.text_b = text_b
+        self.labels = labels
 
 
-@dataclass
-class NERInputExample:
 
-    guid: str
-    text_a: str
-    text_b: Optional[str] = None
-    label: Optional[List[str]] = None
-
-    def to_json_string(self):
-        """Serializes this instance to a JSON string."""
-        return json.dumps(dataclasses.asdict(self), indent=2) + "\n"

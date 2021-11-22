@@ -22,7 +22,6 @@ class BaseModel(nn.Module):
 
 
 
-
     @staticmethod
     def _init_weights(blocks, **kwargs):
         """
@@ -40,7 +39,7 @@ class BaseModel(nn.Module):
                     nn.init.zeros_(module.bias)
 
 
-class BertCRF(BaseModel):
+class CRFModel(BaseModel):
 
     def __init__(self,
                  bert_dir,
