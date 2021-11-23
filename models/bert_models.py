@@ -93,45 +93,34 @@ class CRFModel(BaseModel):
         emissions = self.classifier(seq_out)
 
         if labels is not None:
-            if pseudo is not None:
-                # (batch,)
-                tokens_loss = -1. * self.crf_module(emissions=emissions,
-                                                    tags=labels.long(),
-                                                    mask=attention_masks.byte(),
-                                                    reduction='none')
 
-                # nums of pseudo data
-                pseudo_nums = pseudo.sum().item()
-                total_nums = token_ids.shape[0]
-
-                # learning parameter
-                rate = torch.sigmoid(self.loss_weight)
-                if pseudo_nums == 0:
-                    loss_0 = tokens_loss.mean()
-                    loss_1 = (rate*pseudo*tokens_loss).sum()
-                else:
-                    if total_nums == pseudo_nums:
-                        loss_0 = 0
-                    else:
-                        loss_0 = ((1 - rate) * (1 - pseudo) * tokens_loss).sum() / (total_nums - pseudo_nums)
-                    loss_1 = (rate*pseudo*tokens_loss).sum() / pseudo_nums
-
-                tokens_loss = loss_0 + loss_1
-
-            else:
-                tokens_loss = -1. * self.crf_module(emissions=emissions,
-                                                    tags=labels.long(),
-                                                    mask=attention_masks.byte(),
-                                                    reduction='mean')
-
+            tokens_loss = -1. * self.crf_module(emissions=emissions,
+                                                tags=labels.long(),
+                                                mask=attention_masks.byte(),
+                                                reduction='mean')
             out = (tokens_loss,)
 
         else:
-            tokens_out = self.crf_module.decode(emissions=emissions, mask=attention_masks.byte())
 
+
+            tokens_out = self.crf_module.decode(emissions=emissions, mask=attention_masks.byte())
             out = (tokens_out, emissions)
 
         return out
+
+
+
+def build_model(task_type, bert_dir, **kwargs):
+    assert task_type in ['crf', 'span', 'mrc']
+
+    if task_type == 'crf':
+        model = CRFModel(bert_dir=bert_dir,
+                         num_tags=kwargs.pop('num_tags'),
+                         dropout_prob=kwargs.pop('dropout_prob', 0.1))
+
+
+
+    return model
 
 
 

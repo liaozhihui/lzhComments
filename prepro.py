@@ -79,53 +79,54 @@ class NerProcessor(DataProcessor):
 
 
 
-def convert_example_to_feature(examples,tokenizer,max_len,label_list,):
+def convert_example_to_feature(examples,bert_dir,max_len,label_list):
+    tokenizer = BertTokenizer(os.path.join(bert_dir, 'vocab.txt'))
 
-        def convert_text_to_id(text):
+    def convert_text_to_id(text):
 
-            tokens = tokenizer.tokenize(text,add_special_tokens=True)
-            tokens = ["[CLS]"]+tokens[:max_len-2]+["[SEP]"]
-            text_len = len(text)
-            tokens_id = tokenizer.convert_tokens_to_ids(tokens+["[PAD]"]*(max_len-text_len))
-            attention_mask = [1]*text_len+[0]*(max_len-text_len)
-            token_type_ids = [0]*max_len
+        tokens = tokenizer.tokenize(text,add_special_tokens=True)
+        tokens = ["[CLS]"]+tokens[:max_len-2]+["[SEP]"]
+        text_len = len(text)
+        tokens_id = tokenizer.convert_tokens_to_ids(tokens+["[PAD]"]*(max_len-text_len))
+        attention_mask = [1]*text_len+[0]*(max_len-text_len)
+        token_type_ids = [0]*max_len
 
-            assert len(tokens_id) == len(attention_mask) == len(token_type_ids) == max_len
-
-
-            return tokens,tokens_id,attention_mask,token_type_ids
-
-        features = []
-
-        labels_map = {label:i for i,label in enumerate(label_list)}
+        assert len(tokens_id) == len(attention_mask) == len(token_type_ids) == max_len
 
 
-        for example in examples:
+        return tokens,tokens_id,attention_mask,token_type_ids
 
-            tokens,token_ids,attention_masks,token_type_ids = convert_text_to_id(example.text_a)
+    features = []
 
-            label_ids = [labels_map["O"]]
+    labels_map = {label:i for i,label in enumerate(label_list)}
 
 
-            for j in example.label:
+    for example in examples:
 
-                label_ids.append(labels_map[j])
-            label_ids.append(labels_map["O"])
+        tokens,token_ids,attention_masks,token_type_ids = convert_text_to_id(example.text_a)
 
-            if max_len>len(label_ids):
-                label_ids = label_ids+["O"]*(max_len-len(label_ids))
+        label_ids = [labels_map["O"]]
 
-            assert len(label_ids)==len(token_ids)
 
-            feature = CRFFeature(
-                # bert inputs
-                token_ids=token_ids,
-                attention_masks=attention_masks,
-                token_type_ids=token_type_ids,
-                labels=label_ids)
-            features.append(feature)
+        for j in example.label:
 
-        return features
+            label_ids.append(labels_map[j])
+        label_ids.append(labels_map["O"])
+
+        if max_len>len(label_ids):
+            label_ids = label_ids+["O"]*(max_len-len(label_ids))
+
+        assert len(label_ids)==len(token_ids)
+
+        feature = CRFFeature(
+            # bert inputs
+            token_ids=token_ids,
+            attention_masks=attention_masks,
+            token_type_ids=token_type_ids,
+            labels=label_ids)
+        features.append(feature)
+
+    return features
 
 
 
@@ -134,14 +135,9 @@ processors = {
     "commentNer": NerProcessor
     }
 
-args={
 
-}
 
-def load_and_cache_examples(args,tokenizer,task="commentNer",**kwargs):
 
-    processor = processors[task]()
-    label_list = processor.get_labels(args.data_dir)
 
 
 
