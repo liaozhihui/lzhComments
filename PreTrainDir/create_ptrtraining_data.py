@@ -26,7 +26,7 @@ import tensorflow as tf
 import tokenization
 import os
 
-flags = tf.compat.v1.flags
+flags = tf.flags
 
 FLAGS = flags.FLAGS
 
@@ -564,7 +564,7 @@ def truncate_seq_pair(tokens_a, tokens_b, max_num_tokens, rng):
 
 
 def main(_):
-    # tf.logging.set_verbosity(tf.compat.v1.logging.INFO)
+    tf.logging.set_verbosity(tf.logging.INFO)
     # 创建保存的文件夹
     dirs = 'records'
 
@@ -612,4 +612,4 @@ if __name__ == "__main__":
     # flags.mark_flag_as_required("input_file")
     # flags.mark_flag_as_required("output_file")
     # flags.mark_flag_as_required("vocab_file")
-    main(1)
+    tf.app.run()
